@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'booking_screen.dart';
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsScreen extends StatefulWidget {
   final Map<String, String> event;
 
   EventDetailsScreen({required this.event});
+
+  @override
+  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
+}
+
+class _EventDetailsScreenState extends State<EventDetailsScreen> {
+  bool _isAddedToCalendar = false;
 
   String getElaborateDescription(String? name) {
     switch (name) {
@@ -74,35 +81,29 @@ class EventDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String eventName = event['name'] ?? 'Event';
+    String eventName = widget.event['name'] ?? 'Event';
     final details = getEventDetails()[eventName];
 
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: NetworkImage(
-                  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bXVzaWMlMjBuaWdodHxlbnwwfHwwfHx8MA%3D%3D',
+                  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?fm=jpg&q=60&w=3000',
                 ),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-
-          // Semi-transparent overlay
           Container(
             color: Colors.black.withOpacity(0.4),
           ),
-
           Column(
             children: [
               Container(
                 padding: EdgeInsets.only(top: 40, bottom: 10),
-                width: double.infinity,
-                color: Colors.transparent,
                 alignment: Alignment.center,
                 child: Text(
                   eventName,
@@ -121,7 +122,7 @@ class EventDetailsScreen extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.network(
-                          event['image'] ?? '',
+                          widget.event['image'] ?? '',
                           height: 250,
                           width: 300,
                           fit: BoxFit.cover,
@@ -195,17 +196,31 @@ class EventDetailsScreen extends StatelessWidget {
                           SizedBox(width: 20),
                           OutlinedButton(
                             style: OutlinedButton.styleFrom(
+                              backgroundColor: _isAddedToCalendar
+                                  ? Colors.white
+                                  : Colors.transparent,
                               side: BorderSide(color: Colors.white),
                             ),
                             onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Colors.white,
-                                  content: Text("Added to Calendar!", style: TextStyle(color: Colors.black)),
-                                ),
-                              );
+                              if (!_isAddedToCalendar) {
+                                setState(() {
+                                  _isAddedToCalendar = true;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: Colors.white,
+                                    content: Text("Added to Calendar!",
+                                        style: TextStyle(color: Colors.black)),
+                                  ),
+                                );
+                              }
                             },
-                            child: Text("Add to Calendar", style: TextStyle(color: Colors.white)),
+                            child: Text(
+                              _isAddedToCalendar ? "Already Added" : "Add to Calendar",
+                              style: TextStyle(
+                                color: _isAddedToCalendar ? Colors.black : Colors.white,
+                              ),
+                            ),
                           ),
                         ],
                       ),
